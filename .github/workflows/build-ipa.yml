@@ -41,9 +41,9 @@ jobs:
           BUNDLE_ID: 'com.zak5978.smarthome'
         run: npx expo prebuild --platform ios --clean
 
-      - name: Force iOS 16.0 deployment target
+      - name: Force iOS 16.4 deployment target
         run: |
-          sed -i '' "s/platform :ios, .*/platform :ios, '16.0'/g" ios/Podfile
+          sed -i '' "s/platform :ios, .*/platform :ios, '16.4'/g" ios/Podfile
           cd ios && pod install
 
       - name: Build Unsigned IPA (ARM64 iphoneos)
@@ -51,7 +51,7 @@ jobs:
           cd ios
           WORKSPACE=$(ls -d *.xcworkspace | head -n 1)
           SCHEME=$(basename "$WORKSPACE" .xcworkspace)
-          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -archivePath build/App.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" IPHONEOS_DEPLOYMENT_TARGET=16.0
+          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -archivePath build/App.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" IPHONEOS_DEPLOYMENT_TARGET=16.4
           mkdir -p build/Payload
           cp -r build/App.xcarchive/Products/Applications/*.app build/Payload/
           cd build
