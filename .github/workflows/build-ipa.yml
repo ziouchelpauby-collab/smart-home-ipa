@@ -2,6 +2,10 @@ name: Build Unsigned iOS IPA
 on:
   workflow_dispatch:
 
+env:
+  APPLE_TEAM_ID: '0000000000'
+  BUNDLE_ID: 'com.zak5978.smarthome'
+
 jobs:
   build:
     runs-on: macos-latest
@@ -13,6 +17,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Create .env.local
+        run: |
+          echo "APPLE_TEAM_ID=0000000000" > .env.local
+          echo "BUNDLE_ID=com.zak5978.smarthome" >> .env.local
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
@@ -27,7 +36,7 @@ jobs:
             const cfg = res.expo ? res.expo : res;
             if (Array.isArray(cfg.plugins)) {
               cfg.plugins = cfg.plugins.filter(p => {
-                const name = Array.isArray(p) ? p[0] : p;
+                const name = Array.isArray(p) ? p : p;
                 return name !== '@bacons/apple-targets';
               });
             }
@@ -36,9 +45,6 @@ jobs:
           EOF
 
       - name: Prebuild iOS native project
-        env:
-          APPLE_TEAM_ID: '0000000000'
-          BUNDLE_ID: 'com.zak5978.smarthome'
         run: npx expo prebuild --platform ios --clean
 
       - name: Force iOS 16.4 deployment target
