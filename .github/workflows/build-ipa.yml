@@ -17,18 +17,33 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Disable Apple extensions & set iOS 16.0 target
+        run: |
+          node -e "
+            const fs = require('fs');
+            let cfg = fs.readFileSync('app.config.js', 'utf8');
+            cfg = cfg.replace(/'@bacons\/apple-targets'/g, '// \"@bacons/apple-targets\"');
+            cfg = cfg.replace(/\"@bacons\/apple-targets\"/g, '// \"@bacons/apple-targets\"');
+            fs.writeFileSync('app.config.js', cfg);
+          "
+
       - name: Prebuild iOS native project
         env:
           APPLE_TEAM_ID: '0000000000'
           BUNDLE_ID: 'com.zak5978.smarthome'
         run: npx expo prebuild --platform ios --clean
 
+      - name: Force iOS 16.0 deployment target in Podfile
+        run: |
+          sed -i '' "s/platform :ios, .*/platform :ios, '16.0'/g" ios/Podfile
+          cd ios && pod install
+
       - name: Build Unsigned IPA (ARM64 iphoneos)
         run: |
           cd ios
           WORKSPACE=$(ls -d *.xcworkspace | head -n 1)
           SCHEME=$(basename "$WORKSPACE" .xcworkspace)
-          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -archivePath build/App.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -archivePath build/App.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" IPHONEOS_DEPLOYMENT_TARGET=16.0
           mkdir -p build/Payload
           cp -r build/App.xcarchive/Products/Applications/*.app build/Payload/
           cd build
