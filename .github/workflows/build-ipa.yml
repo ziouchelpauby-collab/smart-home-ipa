@@ -47,6 +47,13 @@ jobs:
       - name: Prebuild iOS native project
         run: npx expo prebuild --platform ios --clean
 
+      - name: Remove WatchSync & SmartHomeShortcuts from AppDelegate.swift
+        run: |
+          if [ -f "ios/SmartHome/AppDelegate.swift" ]; then
+            sed -i '' '/SmartHomeShortcuts/d' ios/SmartHome/AppDelegate.swift
+            sed -i '' '/WatchSync/d' ios/SmartHome/AppDelegate.swift
+          fi
+
       - name: Force iOS 16.4 deployment target
         run: |
           sed -i '' "s/platform :ios, .*/platform :ios, '16.4'/g" ios/Podfile
