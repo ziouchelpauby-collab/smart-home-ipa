@@ -17,15 +17,23 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Disable Apple extensions & set iOS 16.0 target
+      - name: Safely disable Apple extensions in app.config.js
         run: |
-          node -e "
-            const fs = require('fs');
-            let cfg = fs.readFileSync('app.config.js', 'utf8');
-            cfg = cfg.replace(/'@bacons\/apple-targets'/g, '// \"@bacons/apple-targets\"');
-            cfg = cfg.replace(/\"@bacons\/apple-targets\"/g, '// \"@bacons/apple-targets\"');
-            fs.writeFileSync('app.config.js', cfg);
-          "
+          mv app.config.js app.config.orig.js
+          cat << 'EOF' > app.config.js
+          const orig = require('./app.config.orig.js');
+          module.exports = (ctx) => {
+            const res = typeof orig === 'function' ? orig(ctx) : orig;
+            const cfg = res.expo ? res.expo : res;
+            if (Array.isArray(cfg.plugins)) {
+              cfg.plugins = cfg.plugins.filter(p => {
+                const name = Array.isArray(p) ? p[0] : p;
+                return name !== '@bacons/apple-targets';
+              });
+            }
+            return res;
+          };
+          EOF
 
       - name: Prebuild iOS native project
         env:
@@ -33,7 +41,7 @@ jobs:
           BUNDLE_ID: 'com.zak5978.smarthome'
         run: npx expo prebuild --platform ios --clean
 
-      - name: Force iOS 16.0 deployment target in Podfile
+      - name: Force iOS 16.0 deployment target
         run: |
           sed -i '' "s/platform :ios, .*/platform :ios, '16.0'/g" ios/Podfile
           cd ios && pod install
