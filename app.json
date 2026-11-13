@@ -15,7 +15,15 @@
           "NSAllowsLocalNetworking": true
         },
         "NSLocalNetworkUsageDescription": "Connects to Home Assistant on your home network.",
-        "NSMicrophoneUsageDescription": "Lets you talk through your Blink cameras."
+        "NSMicrophoneUsageDescription": "Lets you talk through your Blink cameras.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.zak5978.smarthome",
+      "appleTeamId": "0000000000",
+      "entitlements": {
+        "keychain-access-groups": [
+          "$(AppIdentifierPrefix)com.zak5978.smarthome.shared"
+        ]
       }
     },
     "android": {
@@ -66,6 +74,37 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "bundleIdentifier": "com.zak5978.smarthome.widget",
+                  "targetName": "SmartHomeWidget",
+                  "entitlements": {
+                    "keychain-access-groups": [
+                      "$(AppIdentifierPrefix)com.zak5978.smarthome.shared"
+                    ]
+                  }
+                },
+                {
+                  "bundleIdentifier": "com.zak5978.smarthome.watch",
+                  "targetName": "SmartHomeWatch"
+                },
+                {
+                  "bundleIdentifier": "com.zak5978.smarthome.notification-service",
+                  "targetName": "SmartHomeNotification"
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "515a921e-b5b5-445b-9ead-1ea9892dc685"
+      }
     }
   }
 }

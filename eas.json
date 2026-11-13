@@ -1,0 +1,30 @@
+{
+  "cli": {
+    "version": ">= 27.9.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "unsigned": {
+      "env": {
+        "APPLE_TEAM_ID": "0000000000",
+        "BUNDLE_ID": "com.zak5978.smarthome"
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

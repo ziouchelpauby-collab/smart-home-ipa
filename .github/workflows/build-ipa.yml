@@ -1,0 +1,41 @@
+name: Build Unsigned iOS IPA
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Prebuild iOS native project
+        env:
+          APPLE_TEAM_ID: '0000000000'
+          BUNDLE_ID: 'com.zak5978.smarthome'
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Build Unsigned IPA (ARM64 iphoneos)
+        run: |
+          cd ios
+          WORKSPACE=$(ls -d *.xcworkspace | head -n 1)
+          SCHEME=$(basename "$WORKSPACE" .xcworkspace)
+          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -archivePath build/App.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+          mkdir -p build/Payload
+          cp -r build/App.xcarchive/Products/Applications/*.app build/Payload/
+          cd build
+          zip -r ../../SmartHome-ARM64.ipa Payload
+
+      - name: Upload Unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: SmartHome-ARM64-IPA
+          path: SmartHome-ARM64.ipa
